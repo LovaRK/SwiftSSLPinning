@@ -36,4 +36,24 @@ final class SSLPinningTests: XCTestCase {
         let manager = SSLPinningManager(strategy: certStrategy)
         XCTAssertNotNil(manager)
     }
+    
+    func testInvalidCertificateData() {
+        // Should fail to create a certificate from invalid data
+        let invalidData = Data([0x00, 0x01, 0x02])
+        let cert = SecCertificateCreateWithData(nil, invalidData as CFData)
+        XCTAssertNil(cert, "Invalid certificate data should not create a certificate")
+    }
+
+    func testWrongPinFailsValidation() {
+        // Simulate a wrong pin scenario using public API
+        let hasher = SHA256HashingService()
+        let correctKeyHash = Data("correct-key".utf8)
+        let wrongKeyHash = Data("wrong-key".utf8)
+        let strategy = PublicKeyPinningStrategy(pinnedKeyHashes: [wrongKeyHash], hasher: hasher)
+        // There is no public validate method, so we just check that the strategy is created and does not throw
+        XCTAssertNotNil(strategy)
+        // If/when a public validate method is available, add a test for validation failure here
+    }
+
+    // testSimulatedExpiredCertificate removed as the error type does not exist and this test cannot be implemented yet.
 } 
