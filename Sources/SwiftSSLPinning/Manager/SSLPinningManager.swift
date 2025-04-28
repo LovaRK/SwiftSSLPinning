@@ -29,4 +29,23 @@ public actor SSLPinningManager {
             throw error
         }
     }
+
+    /// Handles URLSession authentication challenges for SSL pinning.
+    /// Can be called from a custom URLSession delegate.
+    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+              let serverTrust = challenge.protectionSpace.serverTrust else {
+            completionHandler(.performDefaultHandling, nil)
+            return
+        }
+        Task {
+            do {
+                try await self.validateServerTrust(serverTrust)
+                completionHandler(.useCredential, URLCredential(trust: serverTrust))
+            } catch {
+                logger.logError("Authentication challenge cancelled: \(error.localizedDescription)")
+                completionHandler(.cancelAuthenticationChallenge, nil)
+            }
+        }
+    }
 } 
