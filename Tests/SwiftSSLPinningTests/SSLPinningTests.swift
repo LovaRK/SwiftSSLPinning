@@ -21,7 +21,7 @@ final class SSLPinningTests: XCTestCase {
         
         // Test strategy creation
         let certData = Data("test certificate".utf8)
-        let certStrategy = CertificatePinningStrategy(certificateData: certData)
+        let certStrategy = CertificatePinningStrategy(certificateData: [certData])
         XCTAssertNotNil(certStrategy)
         
         let keyHashes = [Data("test key hash".utf8)]
@@ -56,4 +56,4 @@ final class SSLPinningTests: XCTestCase {
     }
 
     // testSimulatedExpiredCertificate removed as the error type does not exist and this test cannot be implemented yet.
-} 
+}
